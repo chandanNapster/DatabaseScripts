@@ -356,7 +356,7 @@ WITH RECURSIVE cte_friendOf AS (
 	  JOIN (SELECT person_id AS kws, known_id AS kn FROM knows) AS k
    NATURAL
 	  JOIN (SELECT person_id AS kn, liked_id AS m FROM likes) AS l
-	 WHERE f.kws = 1 
+	--  WHERE f.kws = 1 
 	 UNION 
 	SELECT f.m , f.fn
 	  FROM (SELECT person_id AS m, friend_id AS fn FROM friendOf AS f) AS f
