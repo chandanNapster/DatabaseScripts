@@ -144,7 +144,7 @@ VALUES
 -- DROP VIEW trv_friend_of;
 -- DROP VIEW trv_knows;
 
-CREATE OR REPLACE TEMPORARY RECURSIVE VIEW tvr_knows (person_id, known_id) AS
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
 	SELECT f.person_id AS source, f.known_id AS conn
 	  FROM knows AS f
 
@@ -224,7 +224,7 @@ SELECT * FROM trv_friend_of;
     BUT THIS STILL DOES NOT WORKS.
 */
 
-CREATE OR REPLACE TEMPORARY RECURSIVE VIEW tvr_knows (person_id, known_id) AS
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
 	SELECT f.person_id AS source, f.known_id AS conn
 	  FROM knows AS f
 

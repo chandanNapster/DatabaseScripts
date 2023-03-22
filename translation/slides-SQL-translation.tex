@@ -1,0 +1,239 @@
+\documentclass{beamer}
+\usepackage{etex}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{bussproofs} 
+\usepackage{tikz}
+\usepackage{tikz-qtree} 
+\usepackage{alltt}
+\usepackage{listings}          % format code
+% First define common settings for all languages
+\usepackage{xcolor}
+\definecolor{darkgreen}{rgb}{0,0.55,0.08} 
+\definecolor{darkblue}{rgb}{0,0.08,0.55}
+\lstset{
+	tabsize=2,
+	showstringspaces=false,
+	basicstyle=\small\ttfamily,
+	keywordstyle=[1]\color{blue},
+        keywordstyle=[2]\color{blue}\bfseries,
+	% Extra space before and below listings
+%  	aboveskip=\smallskipamount\smallskip,
+% 	belowskip=\medskipamount\medskip,
+	breaklines=true,
+	escapeinside={/*@}{@*/},
+	% captions below listings
+	captionpos=b, 
+        numbers=none,
+        frame=none,
+}
+
+% XQuery v1.0 (2007-01), http://www.w3.org/TR/xquery/#id-terminal-delimitation
+% \lstdefinelanguage{XQuery}{
+% 	sensitive=true,
+%         alsodigit={-},
+% 	morekeywords=[1]{ancestor,ancestor-or-self,child,descendant,descendant-or-self,following,following-sibling,parent,preceding,preceding-sibling,self},
+%         otherkeywords={/,::,*,[,]},
+%         morekeywords=[2]{let,for,in,return,if,then,else},
+%         moredelim=[s][\normalsize\ttfamily\color{darkgreen}]{<}{>}
+% }
+\lstset{language=SQL}
+
+\usepackage{stmaryrd}
+\usepackage{tikz}
+\usepackage{apxproof}
+\usepackage{mathpartir}
+
+ 
+\newcommand{\typ}[3][\Gamma]{{#1} \vdash {#2} : {#3}}
+\newcommand{\form}[1][\Gamma]{\mathcal{F}[#1]}
+
+
+\newcommand{\sparql}{{\textsc{sparql}}}
+\newcommand{\rdf}{{\textsc{rdf}}}
+\newcommand{\cc}[1]{{\textsc{#1}}}
+\newcommand{\ttt}[1]{{\texttt{#1}}}
+\newcommand{\rmus}{{\itshape rest-\textmu}-RA}
+\newcommand{\mus}{{$\mu$-RA}}
+\newcommand{\sgx}{\textsc{SparqlGX}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\filt}[2][\mathfrak f]{{\sigma_{#1}\left(#2\right)}}
+\newcommand{\cst}{c\rightarrow v}
+\newcommand{\agg}[2][]{\Theta\left(#2,g{#1},{\C}{#1}, {\D}{#1}\right) }
+\newcommand{\specialagg}[4]{\Theta\left(#4,#1,{#2}, {#3}\right) }
+
+\newcommand*\typej[3]{#1 \vdash #2 : #3}
+
+\newcommand{\sem}[2]{{\llbracket#1\rrbracket}_{#2}}
+\newcommand{\trad}[2]{{{#1}(#2)}}
+\newcommand{\dom}[1]{dom(#1)}
+\newcommand{\rename}[3]{\rho_{#1}^{#2}\left(#3\right)}
+\newcommand{\drop}[2]{\widetilde{\pi}_{#1}\left(#2\right)}
+\newcommand{\proj}[2]{\pi_{#1}\left(#2\right)}
+\newcommand{\mult}[3]{\beta_{#1}^{#2}\left(#3\right)}
+
+
+\newcommand{\AJoin}{\triangleright}
+\newcommand{\NJoin}{\bowtie}
+\newenvironment{hproof}{%
+  \renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}
+
+\newcommand{\RJoin}{\mathbin{\NJoin_{\hspace{-0.3em}R\hspace{0.3em}}}}
+
+\newcommand{\letb}[3][X]{\mbox{let }\left(#1=#2\right)\mbox{ in }#3}
+\newcommand{\fixpt}[2][X]{\mu {\left(#1=#2\right)}}
+
+% the competitors, we cannot provide the full name of all of them
+\newcommand{\postgres}{\textbf{P}}
+\newcommand{\prototype}{\textbf{P}'}
+\newcommand{\virtuoso}{\textbf{V}}
+\newcommand{\logicblox}{\textbf{L}}
+\newcommand{\neofourj}{\textbf{N}}
+
+% I suggest we use the following macros to denote column names src and trg, no matter how we finally call them
+\newcommand{\srcCol}{\texttt{src}}
+\newcommand{\trgCol}{\texttt{trg}}
+\newcommand{\edgeLabelCol}{\texttt{l}}
+
+%translation functions
+\newcommand*\trans[1]{\llparenthesis{#1}\rrparenthesis}
+\newcommand{\muset}[1]{\left\{{#1}\right\}}  
+\newcommand{\transVertexFilter}[3]{\theta_{#1}^{#2}\left(#3\right)}
+\newcommand{\transProj}[2]{\Pi\left(#1\right)_{#2}}
+\newcommand{\combine}[2]{\texttt{combine}\left({#1}\right)_{#2}}
+
+%xps:
+\newcommand{\yago}{\textsc{yago}}
+
+\newcommand{\queryplan}[1]{\ensuremath{\mathcal{P}_{#1}}}
+
+
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+%\setbeamertemplate{footline}{\null\hfill\insertframenumber}
+
+
+\newcommand*\blue[1]{{\color{blue}#1}}
+\newcommand*\dblue[1]{{\color{darkblue}#1}}
+\newcommand*\green[1]{{\color{darkgreen}#1}}
+\newcommand*\red[1]{{\color{red}#1}}
+\begin{document}
+
+
+\title{Translating \mus{} into SQL}
+\date{3rd October 2019}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+  \item Mostly straightforward
+
+    (\mus{} is a variant of RA, and SQL is based on RA)
+    \pause
+  \item Need \blue{type information} to transform \mus{}’s anti-projections into SQL’s native projections.
+
+    (\blue{Type} of a relation = the names of its attributes)
+
+    \noindent\pause\hfill\green{This information can be inferred.}
+
+    \pause
+  \item How to translate fixpoints ?
+    \begin{itemize}
+      \pause
+    \item We first \blue{decompose} fixpoints :
+      $\fixpt\varphi = \fixpt{\kappa\cup\psi}$ where $\kappa$ does not
+      contain $X$ and $\psi$ depends \blue{linearly} of $X$, i.e.
+      every tuple of $\psi$ is obtained from exactly one tuple of $X$.
+
+      \pause\dblue{Theorem:} Decomposition is always possible.
+
+      \pause\dblue{Property:} Decomposed fixpoints can be computed
+      iteratively by binding $X$ initially to $\kappa$ and then to
+      only the new tuples generated each time.
+\pause\item Fixpoint terms can be translated into recursive SQL
+\blue{if} $\psi$ contains exactly one occurrence of $X$.
+
+\noindent\pause\hfill\green{This is always the case for raw translated
+UCRPQs.}
+\pause\item When they cannot, we can use the DBMS’s procedural
+language to execute a \texttt{WHILE} loop computing the fixpoint into
+a temporary table.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{So what exactly do we feed PostgreSQL?}
+  % \begin{itemize}
+  % \item A sequence of \lstinline|CREATE TEMPORARY| statements
+  %   translating fixpoint terms;
+  % \item A main \lstinline|SELECT| query referencing the temporary
+  %   elements.
+  % \end{itemize}
+  % \pause
+  \begin{align*}
+    \trans{X} &= \text{\lstinline{SELECT * FROM X}}\\
+    \trans{|c_i\to v_i|_{1\leqslant i\leqslant n}} &=
+      \text{\lstinline{SELECT} } v_1 \text{ \lstinline{AS} }
+       c_1,\ldots, v_n \text{ \lstinline{AS} } c_n\\
+    \trans{\filt{\varphi}} &= \text{\lstinline{SELECT * FROM}
+                             }(\trans{\varphi}) \text{
+                             \lstinline{WHERE} } \mathfrak{f}\\
+    \trans{\drop a \varphi} &= \text{\lstinline{SELECT <other cols>
+                              FROM} }(\trans\varphi)\\    
+    \trans{\rename a b \varphi} &= \text{\lstinline{SELECT a AS b,
+                                  <other_cols> FROM}
+                                  }(\trans\varphi)\\
+    \trans{\mult a b \varphi} &= \text{\lstinline{SELECT a AS b
+                                  <all_cols> FROM}
+                               }(\trans\varphi)\\
+    \trans{\varphi\cup\psi} &= \text{\lstinline{SELECT * FROM}
+                              }(\trans{\varphi}) \text{
+                              \lstinline!UNION SELECT * FROM !} (\trans{\psi})\\
+    \trans{\varphi\NJoin\psi} &= \text{\lstinline{SELECT * FROM} }(\trans{\varphi}) \text{ \lstinline|NATURAL
+                                JOIN| } (\trans{\psi})\\
+    \trans{\fixpt{\kappa\cup\psi}} &= \text{\lstinline!X !}
+                                     \textit{ where we add
+                                     before the query the statement:}
+  \end{align*}
+\small
+  \begin{lstlisting}[mathescape]
+CREATE TEMPORARY RECURSIVE VIEW X (<type>) AS
+    SELECT * FROM $\trans\kappa$
+  UNION
+    SELECT * FROM $\trans\psi$;    
+\end{lstlisting}
+\vfill\null
+\end{frame}
+
+\begin{frame}[fragile]
+  Or, if $X$ appears more than once in $\psi$:
+    \begin{lstlisting}[mathescape]
+CREATE TEMPORARY TABLE TMP AS
+ (SELECT * FROM $\trans\kappa$);
+DO $\$\$$BEGIN
+ CREATE TEMPORARY TABLE X AS
+  (SELECT * FROM TMP);
+ WHILE EXISTS (SELECT 1 FROM X) LOOP
+  CREATE TEMPORARY TABLE NEW_LINES AS
+   (SELECT * FROM $\trans\psi$ EXCEPT SELECT * FROM TMP);
+  INSERT INTO TMP (SELECT * FROM NEW_LINES);
+  DROP TABLE X;
+  ALTER TABLE NEW_LINES RENAME TO X;
+ END LOOP;
+END;$\$\$$
+DROP TABLE X;
+ALTER TABLE TMP RENAME TO X;    
+  \end{lstlisting}
+
+\end{frame}
+
+\end{document}
