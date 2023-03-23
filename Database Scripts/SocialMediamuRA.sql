@@ -447,7 +447,7 @@ CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_friend_of (person_id, friend_id, 
     SELECT p, f, k 
 	  FROM (SELECT f, col2 AS p, k 
 			  FROM (SELECT * 
-					  FROM (SELECT person_id AS col2, friend_id AS f, known_id AS k 
+					  FROM (SELECT person_id AS p, friend_id AS col2, known_id AS k 
 							  FROM trv_friend_of
 						   ) AS t 
 				   NATURAL 
@@ -491,7 +491,7 @@ CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a) AS
 		   ) AS const
   UNION 
     SELECT src, a 
-	  FROM (SELECT a, src 
+	  FROM (SELECT src, a 
 			  FROM (SELECT * 
 					  FROM (SELECT src, a AS col1 
 							  FROM fixpoint_trv_friend_of
