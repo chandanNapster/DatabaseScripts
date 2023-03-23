@@ -568,9 +568,9 @@ SELECT * FROM fixpoint_trv_friend_of;
 /*
 Q10 THIS QUERY IS USED TO FIND RECURSIVELY (FRIEND_OF.[KNOWS]+)+
 */
-
-DROP VIEW trv_knows;
 DROP VIEW fixpoint_trv_friend_of;
+DROP VIEW trv_knows;
+
 
 CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
 	SELECT p, k
@@ -645,8 +645,6 @@ SELECT * FROM fixpoint_trv_friend_of;
 BY USING THE EXISTENSIAL QUANTIFIER
 */
 
-DROP VIEW fixpoint_trv_friend_of;
-DROP VIEW trv_knows;
 
 
 CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
@@ -709,3 +707,6 @@ CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a) AS
 		   ) AS rec; 
 	
 SELECT * FROM fixpoint_trv_friend_of;	
+
+DROP VIEW fixpoint_trv_friend_of;
+DROP VIEW trv_knows;
