@@ -568,8 +568,11 @@ SELECT * FROM fixpoint_trv_friend_of;
 /*
 Q10 THIS QUERY IS USED TO FIND RECURSIVELY (FRIEND_OF.[KNOWS]+)+
 */
-DROP VIEW fixpoint_trv_friend_of;
-DROP VIEW trv_knows;
+/*
+*******************************************************************************************
+*******************************************************************************************
+*******************************************************************************************
+*/
 
 
 CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
@@ -638,9 +641,20 @@ CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a, k) AS
 						   ) AS t
 				   ) AS t1
 		   ) AS rec; 
-	
+
+/*RUN THE QUERY*/	
 SELECT * FROM fixpoint_trv_friend_of;
 
+/*JUST DROP THE VIEWS*/
+
+DROP VIEW fixpoint_trv_friend_of;
+DROP VIEW trv_knows;
+
+/*
+*******************************************************************************************
+*******************************************************************************************
+*******************************************************************************************
+*/
 /*
 BY USING THE EXISTENSIAL QUANTIFIER
 */
@@ -706,7 +720,95 @@ CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a) AS
 			EXISTS (SELECT 1 FROM trv_knows WHERE a = person_id)		
 		   ) AS rec; 
 	
+/*
+	RUN THE QUERY
+*/	
 SELECT * FROM fixpoint_trv_friend_of;	
 
+/*
+	JUST DROP THE VIEWS
+*/
+DROP VIEW fixpoint_trv_friend_of;
+DROP VIEW trv_knows;
+
+/*
+*******************************************************************************************
+*******************************************************************************************
+*******************************************************************************************
+*/
+
+/*
+ANOTHER WAY TO DO THE EXISTENTIAL QUANTIFIER
+*/
+
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
+	SELECT p, k
+	  FROM (SELECT p, col1 AS k 
+			  FROM (SELECT * 
+			          FROM (SELECT person_id AS p, known_id AS col1 
+				              FROM knows
+				           ) AS t
+		           ) AS t1
+		   ) AS const
+	UNION
+	
+	SELECT p, k
+	  FROM (SELECT p , k 
+			  FROM (SELECT * 
+			  		  FROM  (SELECT person_id AS p, known_id AS col1 
+					           FROM trv_knows
+				            ) AS t1 
+				   ) AS t
+			NATURAL
+			   JOIN (SELECT * 
+					   FROM (SELECT person_id AS col1, known_id AS k
+					           FROM knows
+					        ) AS t
+					) AS t2
+		   ) AS rec;
+		   		   
+
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a) AS
+    SELECT src, a 
+	  FROM (SELECT src, a 
+			  FROM (SELECT * 
+					  FROM (SELECT person_id AS src, friend_id AS a 
+							  FROM friendOf
+							WHERE person_id = 1 AND EXISTS (SELECT 1 FROM trv_knows WHERE friend_id = person_id)
+						   ) AS t 
+					 
+				   ) AS t
+-- 			 WHERE
+-- 			EXISTS (SELECT 1 FROM trv_knows WHERE a = person_id)
+		   ) AS const
+  UNION 
+    SELECT src, a 
+	  FROM (SELECT src, a 
+			  FROM (SELECT * 
+					  FROM (SELECT src, a AS col1 
+							  FROM fixpoint_trv_friend_of
+						   ) AS t 
+				   NATURAL 
+					  JOIN (SELECT col1, a 
+  							  FROM (SELECT * 
+		  							  FROM (SELECT person_id AS col1, friend_id AS a 
+				  							  FROM friendOf
+											 WHERE EXISTS (SELECT 1 FROM trv_knows WHERE friend_id = person_id)
+			   							   ) AS t 
+	   							   ) AS t 
+						   ) AS cb
+				   ) AS t
+-- 	         WHERE 
+-- 			EXISTS (SELECT 1 FROM trv_knows WHERE a = person_id)		
+		   ) AS rec; 
+	
+/*
+	RUN THE QUERY
+*/	
+SELECT * FROM fixpoint_trv_friend_of;	
+
+/*
+	JUST DROP THE VIEWS
+*/
 DROP VIEW fixpoint_trv_friend_of;
 DROP VIEW trv_knows;
