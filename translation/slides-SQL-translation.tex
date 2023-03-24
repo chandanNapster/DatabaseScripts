@@ -46,6 +46,7 @@
 \usepackage{tikz}
 \usepackage{apxproof}
 \usepackage{mathpartir}
+\usepackage{graphicx}
 
  
 \newcommand{\typ}[3][\Gamma]{{#1} \vdash {#2} : {#3}}
@@ -128,112 +129,140 @@
 \title{Translating \mus{} into SQL}
 \date{3rd October 2019}
 
-\begin{frame}
-  \titlepage
-\end{frame}
+% \begin{frame}
+%   \titlepage
+% \end{frame}
+
+% \begin{frame}
+%   \begin{itemize}
+%   \item Mostly straightforward
+
+%     (\mus{} is a variant of RA, and SQL is based on RA)
+%     \pause
+%   \item Need \blue{type information} to transform \mus{}’s anti-projections into SQL’s native projections.
+
+%     (\blue{Type} of a relation = the names of its attributes)
+
+%     \noindent\pause\hfill\green{This information can be inferred.}
+
+%     \pause
+%   \item How to translate fixpoints ?
+%     \begin{itemize}
+%       \pause
+%     \item We first \blue{decompose} fixpoints :
+%       $\fixpt\varphi = \fixpt{\kappa\cup\psi}$ where $\kappa$ does not
+%       contain $X$ and $\psi$ depends \blue{linearly} of $X$, i.e.
+%       every tuple of $\psi$ is obtained from exactly one tuple of $X$.
+
+%       \pause\dblue{Theorem:} Decomposition is always possible.
+
+%       \pause\dblue{Property:} Decomposed fixpoints can be computed
+%       iteratively by binding $X$ initially to $\kappa$ and then to
+%       only the new tuples generated each time.
+% \pause\item Fixpoint terms can be translated into recursive SQL
+% \blue{if} $\psi$ contains exactly one occurrence of $X$.
+
+% \noindent\pause\hfill\green{This is always the case for raw translated
+% UCRPQs.}
+% \pause\item When they cannot, we can use the DBMS’s procedural
+% language to execute a \texttt{WHILE} loop computing the fixpoint into
+% a temporary table.
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
+
 
 \begin{frame}
-  \begin{itemize}
-  \item Mostly straightforward
+  % \begin{align*}
 
-    (\mus{} is a variant of RA, and SQL is based on RA)
-    \pause
-  \item Need \blue{type information} to transform \mus{}’s anti-projections into SQL’s native projections.
-
-    (\blue{Type} of a relation = the names of its attributes)
-
-    \noindent\pause\hfill\green{This information can be inferred.}
-
-    \pause
-  \item How to translate fixpoints ?
-    \begin{itemize}
-      \pause
-    \item We first \blue{decompose} fixpoints :
-      $\fixpt\varphi = \fixpt{\kappa\cup\psi}$ where $\kappa$ does not
-      contain $X$ and $\psi$ depends \blue{linearly} of $X$, i.e.
-      every tuple of $\psi$ is obtained from exactly one tuple of $X$.
-
-      \pause\dblue{Theorem:} Decomposition is always possible.
-
-      \pause\dblue{Property:} Decomposed fixpoints can be computed
-      iteratively by binding $X$ initially to $\kappa$ and then to
-      only the new tuples generated each time.
-\pause\item Fixpoint terms can be translated into recursive SQL
-\blue{if} $\psi$ contains exactly one occurrence of $X$.
-
-\noindent\pause\hfill\green{This is always the case for raw translated
-UCRPQs.}
-\pause\item When they cannot, we can use the DBMS’s procedural
-language to execute a \texttt{WHILE} loop computing the fixpoint into
-a temporary table.
-  \end{itemize}
-\end{itemize}
+    \begin{table}[h]
+      \resizebox{1.1\textwidth}{!}
+      {%
+      \begin{tabular}{llp{10cm}ll}
+      \cline{1-3}
+       \textbf{\texttt{Graph Pattern}} & \textbf{\texttt{Hop Type}}  & \textbf{\texttt{Relational Algebra Expression}} &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b),} \\ \texttt{(b)-[Knows]->(c)}& \texttt{One Hop And Branch} & $\widetilde\pi_{m} \Bigg( \rename {f_{id}} m F \NJoin \rename {p_{id}} m K \Bigg)$ &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(b)-[Knows]->(d)}& \texttt{Two Hops And Branch} & $\widetilde\pi_{m} \Bigg( \bigg( \rename {f_{id}} m F \NJoin \rename {p_{id}} m F \bigg) \NJoin \rename {p_{id}} m K \Bigg)$ &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(c)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \widetilde\pi_{m} \Bigg( \rename{f_{id}}{m}{\widetilde\pi_{m}(\rename {f_{id}} m F \NJoin \rename {p_{id}} m F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K} \Bigg)$ &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \widetilde\pi_{m,n} \Bigg( \rename{f_{id}}{n}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{F}} \NJoin \rename{f_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K} \Bigg) $ &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \widetilde\pi_{m,n} \Bigg ( \Big( \rename{f_{id}}{m}{F} \NJoin \rename{p_{id}, f_{id}}{m,n}{F} \Big) \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K} \Bigg ) $ &  &  \\ \cline{1-3}
+      \end{tabular}%
+      }
+      \end{table}
+    
+  %  One Hop \hspace{1cm} | \hspace{1cm} \widetilde\pi_{m} \big( \rename {f_{id}} m F \NJoin \rename {p_{id}} m K \big) \\
+  %  Two Hops \hspace{1cm} | \hspace{1cm} \widetilde\pi_{m} \Big( \big( \rename {f_{id}} m F \NJoin \rename {p_{id}} m F \big) \NJoin \rename {p_{id}} m K \Big) \\
+  %  Three Hops 
+    % \trans{\rename a b \varphi} &= \text{\lstinline{SELECT a AS b,
+    % <other_cols> FROM}
+    % } (\trans\varphi)
+  % \end{align*}
 \end{frame}
 
-\begin{frame}[fragile]
-  \frametitle{So what exactly do we feed PostgreSQL?}
-  % \begin{itemize}
-  % \item A sequence of \lstinline|CREATE TEMPORARY| statements
-  %   translating fixpoint terms;
-  % \item A main \lstinline|SELECT| query referencing the temporary
-  %   elements.
-  % \end{itemize}
-  % \pause
-  \begin{align*}
-    \trans{X} &= \text{\lstinline{SELECT * FROM X}}\\
-    \trans{|c_i\to v_i|_{1\leqslant i\leqslant n}} &=
-      \text{\lstinline{SELECT} } v_1 \text{ \lstinline{AS} }
-       c_1,\ldots, v_n \text{ \lstinline{AS} } c_n\\
-    \trans{\filt{\varphi}} &= \text{\lstinline{SELECT * FROM}
-                             }(\trans{\varphi}) \text{
-                             \lstinline{WHERE} } \mathfrak{f}\\
-    \trans{\drop a \varphi} &= \text{\lstinline{SELECT <other cols>
-                              FROM} }(\trans\varphi)\\    
-    \trans{\rename a b \varphi} &= \text{\lstinline{SELECT a AS b,
-                                  <other_cols> FROM}
-                                  }(\trans\varphi)\\
-    \trans{\mult a b \varphi} &= \text{\lstinline{SELECT a AS b
-                                  <all_cols> FROM}
-                               }(\trans\varphi)\\
-    \trans{\varphi\cup\psi} &= \text{\lstinline{SELECT * FROM}
-                              }(\trans{\varphi}) \text{
-                              \lstinline!UNION SELECT * FROM !} (\trans{\psi})\\
-    \trans{\varphi\NJoin\psi} &= \text{\lstinline{SELECT * FROM} }(\trans{\varphi}) \text{ \lstinline|NATURAL
-                                JOIN| } (\trans{\psi})\\
-    \trans{\fixpt{\kappa\cup\psi}} &= \text{\lstinline!X !}
-                                     \textit{ where we add
-                                     before the query the statement:}
-  \end{align*}
-\small
-  \begin{lstlisting}[mathescape]
-CREATE TEMPORARY RECURSIVE VIEW X (<type>) AS
-    SELECT * FROM $\trans\kappa$
-  UNION
-    SELECT * FROM $\trans\psi$;    
-\end{lstlisting}
-\vfill\null
-\end{frame}
+% \begin{frame}[fragile]
+%   \frametitle{So what exactly do we feed PostgreSQL?}
+%   % \begin{itemize}
+%   % \item A sequence of \lstinline|CREATE TEMPORARY| statements
+%   %   translating fixpoint terms;
+%   % \item A main \lstinline|SELECT| query referencing the temporary
+%   %   elements.
+%   % \end{itemize}
+%   % \pause
+%   \begin{align*}
+%     \trans{X} &= \text{\lstinline{SELECT * FROM X}}\\
+%     \trans{|c_i\to v_i|_{1\leqslant i\leqslant n}} &=
+%       \text{\lstinline{SELECT} } v_1 \text{ \lstinline{AS} }
+%        c_1,\ldots, v_n \text{ \lstinline{AS} } c_n\\
+%     \trans{\filt{\varphi}} &= \text{\lstinline{SELECT * FROM}
+%                              }(\trans{\varphi}) \text{
+%                              \lstinline{WHERE} } \mathfrak{f}\\
+%     \trans{\drop a \varphi} &= \text{\lstinline{SELECT <other cols>
+%                               FROM} }(\trans\varphi)\\    
+%     \trans{\rename a b \varphi} &= \text{\lstinline{SELECT a AS b,
+%                                   <other_cols> FROM}
+%                                   }(\trans\varphi)\\
+%     \trans{\mult a b \varphi} &= \text{\lstinline{SELECT a AS b
+%                                   <all_cols> FROM}
+%                                }(\trans\varphi)\\
+%     \trans{\varphi\cup\psi} &= \text{\lstinline{SELECT * FROM}
+%                               }(\trans{\varphi}) \text{
+%                               \lstinline!UNION SELECT * FROM !} (\trans{\psi})\\
+%     \trans{\varphi\NJoin\psi} &= \text{\lstinline{SELECT * FROM} }(\trans{\varphi}) \text{ \lstinline|NATURAL
+%                                 JOIN| } (\trans{\psi})\\
+%     \trans{\fixpt{\kappa\cup\psi}} &= \text{\lstinline!X !}
+%                                      \textit{ where we add
+%                                      before the query the statement:}
+%   \end{align*}
+% \small
+%   \begin{lstlisting}[mathescape]
+% CREATE TEMPORARY RECURSIVE VIEW X (<type>) AS
+%     SELECT * FROM $\trans\kappa$
+%   UNION
+%     SELECT * FROM $\trans\psi$;    
+% \end{lstlisting}
+% \vfill\null
+% \end{frame}
 
-\begin{frame}[fragile]
-  Or, if $X$ appears more than once in $\psi$:
-    \begin{lstlisting}[mathescape]
-CREATE TEMPORARY TABLE TMP AS
- (SELECT * FROM $\trans\kappa$);
-DO $\$\$$BEGIN
- CREATE TEMPORARY TABLE X AS
-  (SELECT * FROM TMP);
- WHILE EXISTS (SELECT 1 FROM X) LOOP
-  CREATE TEMPORARY TABLE NEW_LINES AS
-   (SELECT * FROM $\trans\psi$ EXCEPT SELECT * FROM TMP);
-  INSERT INTO TMP (SELECT * FROM NEW_LINES);
-  DROP TABLE X;
-  ALTER TABLE NEW_LINES RENAME TO X;
- END LOOP;
-END;$\$\$$
-DROP TABLE X;
-ALTER TABLE TMP RENAME TO X;    
-  \end{lstlisting}
+% \begin{frame}[fragile]
+%   Or, if $X$ appears more than once in $\psi$:
+%     \begin{lstlisting}[mathescape]
+% CREATE TEMPORARY TABLE TMP AS
+%  (SELECT * FROM $\trans\kappa$);
+% DO $\$\$$BEGIN
+%  CREATE TEMPORARY TABLE X AS
+%   (SELECT * FROM TMP);
+%  WHILE EXISTS (SELECT 1 FROM X) LOOP
+%   CREATE TEMPORARY TABLE NEW_LINES AS
+%    (SELECT * FROM $\trans\psi$ EXCEPT SELECT * FROM TMP);
+%   INSERT INTO TMP (SELECT * FROM NEW_LINES);
+%   DROP TABLE X;
+%   ALTER TABLE NEW_LINES RENAME TO X;
+%  END LOOP;
+% END;$\$\$$
+% DROP TABLE X;
+% ALTER TABLE TMP RENAME TO X;    
+%   \end{lstlisting}
 
-\end{frame}
+% \end{frame}
 
 \end{document}
