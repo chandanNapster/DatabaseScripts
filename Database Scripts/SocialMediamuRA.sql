@@ -136,7 +136,7 @@ VALUES
 
 
 
---RECURSIVE QUERIES
+--RECURSIVE QUERIES FOR GRAPH NAVIGATION xs
 /*THE FOLLOWING QUERY IS AN EXAMPLE OF (friendOf.[knows+])+
  THIS IS DONE BY ONLY USING NATURAL JOINS LIKE THE ONES DONE FOR muRA
 */
@@ -812,3 +812,337 @@ SELECT * FROM fixpoint_trv_friend_of;
 */
 DROP VIEW fixpoint_trv_friend_of;
 DROP VIEW trv_knows;
+
+
+/*
+*******************************************************************************************
+*******************************************************************************************
+*******************************************************************************************
+*/
+
+/*
+ANOTHER WAY TO WRITE THE QUERY WITH NATURAL JOINS (QUICKER WAY)
+*/
+
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
+	SELECT p, k
+	  FROM (SELECT p, col1 AS k 
+			  FROM (SELECT * 
+			          FROM (SELECT person_id AS p, known_id AS col1 
+				              FROM knows
+				           ) AS t
+		           ) AS t1
+		   ) AS const
+	UNION
+	
+	SELECT p, k
+	  FROM (SELECT p , k 
+			  FROM (SELECT * 
+			  		  FROM  (SELECT person_id AS p, known_id AS col1 
+					           FROM trv_knows
+				            ) AS t1 
+				   ) AS t
+			NATURAL
+			   JOIN (SELECT * 
+					   FROM (SELECT person_id AS col1, known_id AS k
+					           FROM knows
+					        ) AS t
+					) AS t2
+		   ) AS rec;
+		   		   
+
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a, k) AS
+    SELECT src, a , k
+	  FROM (SELECT src, a, k 
+			  FROM (SELECT * 
+					  FROM (SELECT person_id AS src, friend_id AS a 
+							  FROM friendOf
+							 WHERE person_id = 1
+						   ) AS t 
+				   NATURAL
+			  		  JOIN (SELECT *  
+					  		  FROM (SELECT person_id AS a, known_id AS k 
+							          FROM trv_knows
+						           ) AS t
+				           ) AS t1
+				   ) AS t
+		   ) AS const
+     
+	 UNION 
+    
+	SELECT src, a , k
+	  FROM (SELECT src, a, k 
+			  FROM (SELECT * 
+					  FROM (SELECT src, a AS col1 
+							  FROM fixpoint_trv_friend_of
+						   ) AS t 
+				   NATURAL 
+					  JOIN (SELECT * 
+		  					  FROM (SELECT person_id AS col1, friend_id AS a 
+				  					  FROM friendOf
+			   					   ) AS t 
+	   					   ) AS cb 
+				   NATURAL 
+			          JOIN (SELECT * 
+					          FROM (SELECT person_id AS a, known_id AS k 
+							          FROM trv_knows
+						           ) AS t
+				           ) AS t1	
+				   ) AS t
+		   ) AS rec; 
+
+/*RUN THE QUERY*/	
+SELECT * FROM fixpoint_trv_friend_of;
+
+/*JUST DROP THE VIEWS*/
+
+DROP VIEW fixpoint_trv_friend_of;
+DROP VIEW trv_knows;
+
+
+/*
+*******************************************************************************************
+*******************************************************************************************
+*******************************************************************************************
+*/
+
+/*
+NATURAL JOIN WITH CTE OUTER
+*/
+
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
+	SELECT p, k
+	  FROM (SELECT p, col1 AS k 
+			  FROM (SELECT * 
+			          FROM (SELECT person_id AS p, known_id AS col1 
+				              FROM knows
+				           ) AS t
+		           ) AS t1
+		   ) AS const
+	UNION
+	
+	SELECT p, k
+	  FROM (SELECT p , k 
+			  FROM (SELECT * 
+			  		  FROM  (SELECT person_id AS p, known_id AS col1 
+					           FROM trv_knows
+				            ) AS t1 
+				   ) AS t
+			NATURAL
+			   JOIN (SELECT * 
+					   FROM (SELECT person_id AS col1, known_id AS k
+					           FROM knows
+					        ) AS t
+					) AS t2
+		   ) AS rec;
+		   		   
+
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a) AS
+    SELECT src, a 
+	  FROM (SELECT src, a 
+			  FROM (SELECT * 
+					  FROM (SELECT person_id AS src, friend_id AS a 
+							  FROM friendOf
+						   ) AS t 
+					 WHERE src = 1
+				   ) AS t
+		   ) AS const
+  UNION 
+    SELECT src, a 
+	  FROM (SELECT src, a 
+			  FROM (SELECT * 
+					  FROM (SELECT src, a AS col1 
+							  FROM fixpoint_trv_friend_of
+						   ) AS t 
+				   NATURAL 
+					  JOIN (SELECT col1, a 
+  							  FROM (SELECT * 
+		  							  FROM (SELECT person_id AS col1, friend_id AS a 
+				  							  FROM friendOf
+			   							   ) AS t 
+	   							   ) AS t 
+						   ) AS cb
+				   ) AS t	
+		   ) AS rec; 
+	
+/*
+	RUN THE QUERY
+*/	
+SELECT * 
+  FROM fixpoint_trv_friend_of 
+ WHERE  
+EXISTS (SELECT 1 
+		  FROM trv_knows 
+		 WHERE a = person_id)
+		 
+-- ORDER BY 2;	
+
+--   SELECT src, a, k 
+--     FROM fixpoint_trv_friend_of 
+--  NATURAL 
+--     JOIN (SELECT * 
+-- 		    FROM (SELECT person_id AS a, known_id AS k 
+-- 		            FROM trv_knows 
+-- 				 ) AS t
+-- 		 ) AS t1
+		 
+-- ORDER BY 2, 3;	
+
+
+/*
+	JUST DROP THE VIEWS
+*/
+DROP VIEW fixpoint_trv_friend_of;
+DROP VIEW trv_knows;
+
+
+/*
+*******************************************************************************************
+############################____GRAPH PATTERN MATCHING QUERIES_______######################
+*******************************************************************************************
+*******************************************************************************************
+*/
+
+/*
+TWO HOP GRAPH PATTERN MATCHING (COMPLEX GRAPH PATTERN)
+*/
+
+ SELECT person_id, friend_id, known_id 
+   FROM (SELECT * 
+		   FROM (SELECT person_id , friend_id AS m
+           		   FROM friendOf 
+--                   WHERE person_id = 2
+				) AS t 
+		) AS t
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS m, friend_id
+				   FROM friendOf 
+				) AS t
+		) AS t1
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS m, known_id 
+				   FROM knows
+				) AS t
+		) AS t2
+ORDER BY 1;		
+
+/*
+ONE HOP GRAPH PATTERN MATCHING AND A BRANCH
+*/
+
+ SELECT person_id,  known_id 
+   FROM (SELECT * 
+		   FROM (SELECT person_id , friend_id AS m
+           		   FROM friendOf 
+--                   WHERE person_id = 2
+				) AS t 
+		) AS t
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS m, known_id 
+				   FROM knows
+				) AS t
+		) AS t2
+ORDER BY 1;		
+
+/*
+THREE HOP QUERY
+*/
+
+ SELECT person_id, friend_id, known_id 
+   FROM (SELECT * 
+		   FROM (SELECT person_id , friend_id AS m
+           		   FROM friendOf 
+--                   WHERE person_id = 2
+				) AS t 
+		) AS t
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS m, friend_id AS n
+				   FROM friendOf 
+				) AS t
+		) AS t1
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS n, friend_id 
+				   FROM friendOf
+				) AS t
+		) AS t2
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS m, known_id 
+				   FROM knows
+				) AS t
+		) AS t3
+ORDER BY 1;	
+
+/*
+THREE HOPS FIRST VARIANT
+*/
+SELECT person_id, friend_id, known_id 
+   FROM (SELECT person_id, m  
+		   FROM (SELECT person_id , friend_id AS m 
+				   FROM (SELECT * 
+  						   FROM (SELECT person_id , friend_id AS m
+                                   FROM friendOf 
+	                            ) AS t 		
+						NATURAL
+   						   JOIN (SELECT * 
+		                           FROM (SELECT person_id AS m, friend_id 
+				                           FROM friendOf 
+				                        ) AS t
+		                        ) AS t1
+						) AS t
+				) AS t
+		) AS t
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS m, friend_id 
+				   FROM friendOf
+				) AS t
+		) AS t2
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS m, known_id 
+				   FROM knows
+				) AS t
+		) AS t3
+ORDER BY 1;	
+
+/*
+THREE HOP SECOND VARIANT
+*/
+
+SELECT person_id, friend_id, known_id 
+   FROM (SELECT person_id, m, n
+		   FROM (SELECT person_id , friend_id AS n, m 
+				   FROM (SELECT * 
+  						   FROM (SELECT person_id , friend_id AS m
+                                   FROM friendOf 
+	                            ) AS t 		
+						NATURAL
+   						   JOIN (SELECT * 
+		                           FROM (SELECT person_id AS m, friend_id 
+				                           FROM friendOf 
+				                        ) AS t
+		                        ) AS t1
+						) AS t
+				) AS t
+		) AS t
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS n, friend_id 
+				   FROM friendOf
+				) AS t
+		) AS t2
+NATURAL
+   JOIN (SELECT * 
+		   FROM (SELECT person_id AS m, known_id 
+				   FROM knows
+				) AS t
+		) AS t3
+ORDER BY 1;	
+
+		

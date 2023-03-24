@@ -1,5 +1,7 @@
--- DROP view fixpoint_trv_friend_of;
--- DROP view trv_knows;
+DROP view pg_temp_8.fixpoint_trv_friend_of;
+DROP view pg_temp_8.trv_knows;
+DROP view fixpoint_trv_friend_of;
+DROP view trv_knows;
 DROP TABLE IF EXISTS person;
 DROP TABLE IF EXISTS friendOf;
 DROP TABLE IF EXISTS knows;
