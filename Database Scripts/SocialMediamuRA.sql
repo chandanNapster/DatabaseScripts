@@ -1174,4 +1174,61 @@ SELECT person_id, friend_id AS n, next_friend AS m, mk2, nk2
 	   ) AS t
 	   
 ORDER BY 1;
+
+/*
+ THIS A DATA SET AND QUERY TO EXPRESS A STAR PATTERN
+*/
+
+ DROP TABLE friendOf;
+ DROP TABLE knows;
+ 
+ CREATE TABLE friendOf(
+    person_id INT NOT NULL,
+    friend_id INT
+);
+
+CREATE TABLE knows(
+    person_id INT NOT NULL,
+    known_id INT NOT NULL
+);
+
+
+INSERT INTO friendOf(
+    person_id,
+    friend_id
+)   
+VALUES
+    (1,2),
+    (2,3),
+    (3,4);
+
+INSERT INTO knows(
+    person_id,
+    known_id
+)
+VALUES
+    (2,10),
+	(2,11),
+	(3,12),
+	(3,13);
+
+SELECT person_id, known_id , k, friend_id 
+  FROM ( SELECT *
+           FROM (SELECT person_id, friend_id AS m 
+		           FROM friendOf
+	            ) AS t 
+	   
+        NATURAL 
+           JOIN (SELECT person_id AS m , friend_id 
+		           FROM friendOf 
+		        ) AS t1
+        NATURAL
+           JOIN (SELECT person_id AS m, known_id
+		           FROM knows 
+		        ) AS t2
+        NATURAL
+           JOIN (SELECT person_id AS m, known_id AS k 
+      ) AS t
+WHERE k <> known_id	  
+-- ORDER BY 1;
 		
