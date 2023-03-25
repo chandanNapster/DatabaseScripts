@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.2.13)  25 MAR 2023 12:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.2.13)  25 MAR 2023 13:48
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -877,28 +877,28 @@ Dictionary: translator-theorem-dictionary, Language: English
 \openout8 = `slides-SQL-translation.axp'.
 
  (./slides-SQL-translation.nav)
-LaTeX Font Info:    Trying to load font information for U+msa on input line 200.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 201.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 200.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 201.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Trying to load font information for U+stmry on input line 200.
+LaTeX Font Info:    Trying to load font information for U+stmry on input line 201.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/stmaryrd/Ustmry.fd)
-LaTeX Font Info:    Trying to load font information for OT1+mathkerncmss on input line 200.
+LaTeX Font Info:    Trying to load font information for OT1+mathkerncmss on input line 201.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/sansmathaccent/ot1mathkerncmss.fd
 File: ot1mathkerncmss.fd 2020/01/31 Fontinst v1.933 font definitions for OT1/mathkerncmss.
 )
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 200.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 201.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 200.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 201.
 
-Overfull \hbox (30.74231pt too wide) in paragraph at lines 200--200
+Overfull \hbox (30.74231pt too wide) in paragraph at lines 201--201
  [] 
  []
 
@@ -917,7 +917,7 @@ Overfull \hbox (30.74231pt too wide) in paragraph at lines 200--200
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\translate ' on input line 268.
+(hyperref)                removing `\translate ' on input line 269.
 
 (./slides-SQL-translation.axp) (./bu1.aux)
 \openout5 = `bu1.aux'.
@@ -933,16 +933,16 @@ Package rerunfilecheck Info: File `slides-SQL-translation.out' has not changed.
 Here is how much of TeX's memory you used:
  27737 strings out of 478268
  540222 string characters out of 5846347
- 957144 words of memory out of 5000000
+ 960144 words of memory out of 5000000
  45356 multiletter control sequences out of 15000+600000
  480182 words of font info for 59 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 128i,16n,122p,504b,391s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/cm-super/sfss0600.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/cm-super/sftt1095.pfb>
-Output written on slides-SQL-translation.pdf (1 page, 92500 bytes).
+ 128i,16n,122p,504b,397s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/cm-super/sfss0600.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/cm-super/sftt1095.pfb>
+Output written on slides-SQL-translation.pdf (1 page, 100516 bytes).
 PDF statistics:
- 64 PDF objects out of 1000 (max. 8388607)
- 38 compressed objects within 1 object stream
+ 69 PDF objects out of 1000 (max. 8388607)
+ 41 compressed objects within 1 object stream
  3 named destinations out of 1000 (max. 500000)
  43 words of extra memory for PDF output out of 10000 (max. 10000000)
 

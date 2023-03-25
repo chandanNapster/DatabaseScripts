@@ -180,12 +180,13 @@
       {%
       \begin{tabular}{llp{10cm}ll}
       \cline{1-3}
-       \textbf{\texttt{Graph Pattern}} & \textbf{\texttt{Hop Type}}  & \textbf{\texttt{Relational Algebra Expression}} &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b),} \\ \texttt{(b)-[Knows]->(c)}& \texttt{One Hop And Branch} & $\widetilde\pi_{m} \Bigg( \rename {f_{id}} m F \NJoin \rename {p_{id}} m K \Bigg)$ &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(b)-[Knows]->(d)}& \texttt{Two Hops And Branch} & $\widetilde\pi_{m} \Bigg(  \rename {f_{id}} m F \NJoin \rename {p_{id}} m F  \NJoin \rename {p_{id}} m K \Bigg)$ &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(c)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \widetilde\pi_{m} \Bigg( \rename{f_{id}}{m}{\widetilde\pi_{m}(\rename {f_{id}} m F \NJoin \rename {p_{id}} m F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K} \Bigg)$ &  &  \\ \cline{1-3}
+       \textbf{\texttt{Graph Pattern}} & \textbf{\texttt{Hop Type}}  & \textbf{\texttt{Expressions in $\mu-RA$}} &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b),} \\ \texttt{(b)-[Knows]->(c)}& \texttt{One Hop And Branch} & $ \drop{m}{\rename {f_{id}} m F \NJoin \rename {p_{id}} m K} $ &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(b)-[Knows]->(d)}& \texttt{Two Hops And Branch} & $\drop{m}{\rename {f_{id}} m F \NJoin \rename {p_{id}} m F  \NJoin \rename {p_{id}} m K}$ &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(c)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \drop{m}{\rename{f_{id}}{m}{\widetilde\pi_{m}(\rename {f_{id}} m F \NJoin \rename {p_{id}} m F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K}} $ &  &  \\ \cline{1-3}
        \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \widetilde\pi_{m,n} \Bigg( \rename{f_{id}}{n}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{F}} \NJoin \rename{f_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K} \Bigg) $ &  &  \\ \cline{1-3}
        \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \widetilde\pi_{m,n} \Bigg (  \rename{f_{id}}{m}{F} \NJoin \rename{p_{id}, f_{id}}{m,n}{F}   \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K} \Bigg ) $ &  &  \\ \cline{1-3}
+       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \drop{a}{A}   \rename{f_{id}}{m}{F} \NJoin \rename{p_{id}, f_{id}}{m,n}{F}   \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K} $ &  &  \\ \cline{1-3}
       \end{tabular}%
       }
       \end{table}
