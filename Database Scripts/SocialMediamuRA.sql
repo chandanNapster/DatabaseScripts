@@ -1145,4 +1145,33 @@ NATURAL
 		) AS t3
 ORDER BY 1;	
 
+
+/*
+	MORE COMPLEX PATTERN
+*/
+
+SELECT person_id, friend_id AS n, next_friend AS m, mk2, nk2  
+  FROM (SELECT person_id, n AS friend_id ,friend_id AS next_friend, k AS mk2, k2 AS nK2
+		  FROM (SELECT person_id, friend_id AS m 
+				  FROM friendOf 
+			   ) AS t
+	   NATURAL
+		  JOIN (SELECT person_id AS m, friend_id AS n
+			      FROM friendOf 
+			   ) AS t2
+	   NATURAL
+		  JOIN (SELECT person_id AS m, known_id AS k
+				  FROM knows 
+			   ) AS t3
+	   NATURAL
+		  JOIN (SELECT person_id AS n, friend_id 
+				  FROM friendOf
+			   ) AS t4
+	   NATURAL
+		  JOIN (SELECT person_id AS n, known_id AS k2
+				  FROM knows
+			   ) AS t5	
+	   ) AS t
+	   
+ORDER BY 1;
 		
