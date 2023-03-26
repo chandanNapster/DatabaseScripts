@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[16pt, aspectratio=1610]{beamer}
 \usepackage{etex}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -47,6 +47,8 @@
 \usepackage{apxproof}
 \usepackage{mathpartir}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
 
  
 \newcommand{\typ}[3][\Gamma]{{#1} \vdash {#2} : {#3}}
@@ -172,23 +174,203 @@
 % \end{frame}
 
 
+
+
+% 1. \texttt{(a)-[FriendOf]->(b),} \\ \texttt{(b)-[Knows]->(c)}
+% 2. \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(b)-[Knows]->(d)}& \texttt{Two Hops And Branch} 
+% 3. \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(c)-[Knows]->(d)}
+
+
 \begin{frame}
   % \begin{align*}
 
     \begin{table}[h]
-      \resizebox{1.1\textwidth}{!}
+      \resizebox{\textwidth}{!}
       {%
       \begin{tabular}{lllll}
       \cline{1-3}
        \textbf{\texttt{Graph Pattern}} & \textbf{\texttt{Hop Type}}  & \textbf{\texttt{Expressions in $\mu-RA$}} &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b),} \\ \texttt{(b)-[Knows]->(c)}& \texttt{One Hop And Branch} & $ \drop{m}{\rename {f_{id}} m F \NJoin \rename {p_{id}} m K} $ &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(b)-[Knows]->(d)}& \texttt{Two Hops And Branch} & $\drop{m}{\rename {f_{id}} m F \NJoin \rename {p_{id}} m F  \NJoin \rename {p_{id}} m K}$ &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(c)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \drop{m}{\rename{f_{id}}{m}{\widetilde\pi_{m}(\rename {f_{id}} m F \NJoin \rename {p_{id}} m F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K}} $ &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \drop{m,n}{\rename{f_{id}}{n}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{F}} \NJoin \rename{f_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K}} $ &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \drop{m,n}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}, f_{id}}{m,n}{F}   \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K}} $ &  &  \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d), (b)-[Knows]->(e)} \\ \texttt{(c)-[Knows]->(f)} & \texttt{Three Hops And Two Branches} & $ \drop{m,n}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{\rename{f_{id}}{n}{F}} \NJoin \rename{p_{id}}{m}{\rename{k_{id}}{k}{K}} \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{n}{K}} $ && \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(b)-[FriendOf]->(d), (b)-[Knows]->(e)}  & \texttt{Star (Isomorphism based semantics)} & $ \drop{m}{\filt[k <> k_{id}]{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K} \NJoin \rename{p_{id}}{m}{\rename{k_{id}}{k}{K}}}} $ && \\ \cline{1-3}
-       \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(b)-[FriendOf]->(d), (b)-[Knows]->(e)}  & \texttt{Star (Homorphism based semantics)} & $ \drop{m}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K} \NJoin \rename{p_{id}}{m}{\rename{k_{id}}{k}{K}}} $ && \\ \cline{1-3}
+       \begin{tikzpicture}%
+        [>=stealth,
+         shorten >=1pt,
+         node distance=1.75cm,
+         on grid,
+         auto,
+         every state/.style={draw=black!60, fill=black!5, very thick}
+        ]
+      \node[state,fill=green!40] (a)              {a};
+      \node[state, fill=blue!40] (b) [right=of a] {m};
+      \node[state, fill=red!40] (c) [right=of b] {c};
+      
+      
+      \path[->]
+      %   FROM       BEND/LOOP           POSITION OF LABEL   LABEL   TO
+         (a)         edge                              node   {F}    (b)
+         (b)         edge                              node   {K}    (c)
+        %  (c)         edge[bend left = 45]              node   {b}    (c)
+         %     edge[bend right=80] node[swap,very near start]{b} (y)
+                 
+         % (y)   edge[bend left=10]  node                      {d} (z)
+         %       edge[loop left]     node                      {e} (x)
+         % (z) edge[bend left=70]  node[swap,very near start]  {h} (y)
+                 
+         ;
+      \end{tikzpicture} & \texttt{One Hop And Branch} & $ \drop{m}{\rename {f_{id}} m F \NJoin \rename {p_{id}} m K} $ &  &  \\ \cline{1-3}
+      
+      \begin{tikzpicture}%
+        [>=stealth,
+         shorten >=1pt,
+         node distance=1.75cm,
+         on grid,
+         auto,
+         every state/.style={draw=black!60, fill=black!5, very thick}
+        ]
+      \node[state, fill=green!40] (a)              {a};
+      \node[state, fill= blue!40] (b) [right=of a] {m};
+      \node[state, fill=red!40] (c) [right=of b] {c};
+      \node[state, fill=yellow!40] (d) [below=of b] {d};
+      
+      
+      \path[->]
+      %   FROM       BEND/LOOP           POSITION OF LABEL   LABEL   TO
+         (a)         edge                              node   {F}    (b)
+         (b)         edge                              node   {F}    (c)
+         (b)         edge                              node   {K}    (d)
+        %  (c)         edge[bend left = 45]              node   {b}    (c)
+         %     edge[bend right=80] node[swap,very near start]{b} (y)
+                 
+         % (y)   edge[bend left=10]  node                      {d} (z)
+         %       edge[loop left]     node                      {e} (x)
+         % (z) edge[bend left=70]  node[swap,very near start]  {h} (y)
+                 
+         ;
+      \end{tikzpicture} & \texttt{Two hops and a branch} & $\drop{m}{\rename {f_{id}} m F \NJoin \rename {p_{id}} m F  \NJoin \rename {p_{id}} m K}$ &  &  \\ \cline{1-3}
+       
+      \begin{tikzpicture}%
+        [>=stealth,
+         shorten >=1pt,
+         node distance=1.75cm,
+         on grid,
+         auto,
+         every state/.style={draw=black!60, fill=black!5, very thick}
+        ]
+      \node[state, fill=green!40] (a)              {a};
+      \node[state, fill=blue!40] (b) [right=of a] {b};
+      \node[state, fill=red!40] (c) [right=of b] {m};
+      \node[state, fill=yellow!40] (d) [right=of c] {d};
+      \node[state, fill=red!60] (e) [below=of c] {e};
+      
+      
+      \path[->]
+      %   FROM       BEND/LOOP           POSITION OF LABEL   LABEL   TO
+         (a)         edge                              node   {F}    (b)
+         (b)         edge                              node   {F}    (c)
+         (c)         edge                              node   {F}    (d)
+         (c)         edge                              node   {K}    (e)
+        %  (c)         edge[bend left = 45]              node   {b}    (c)
+         %     edge[bend right=80] node[swap,very near start]{b} (y)
+                 
+         % (y)   edge[bend left=10]  node                      {d} (z)
+         %       edge[loop left]     node                      {e} (x)
+         % (z) edge[bend left=70]  node[swap,very near start]  {h} (y)
+                 
+         ;
+      \end{tikzpicture}& \texttt{Three Hops And Branch} & $ \drop{m}{\rename{f_{id}}{m}{\widetilde\pi_{m}(\rename {f_{id}} m F \NJoin \rename {p_{id}} m F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K}} $ &  &  \\ \cline{1-3}
+      
+      \begin{tikzpicture}%
+        [>=stealth,
+         shorten >=1pt,
+         node distance=1.75cm,
+         on grid,
+         auto,
+         every state/.style={draw=black!60, fill=black!5, very thick}
+        ]
+      \node[state, fill=green!40] (a)              {a};
+      \node[state, fill=blue!40] (b) [right=of a] {m};
+      \node[state, fill=red!40] (c) [right=of b] {n};
+      \node[state, fill=yellow!40] (d) [right=of c] {d};
+      \node[state, fill=red!60] (e) [below=of b] {e};
+      
+      
+      \path[->]
+      %   FROM       BEND/LOOP           POSITION OF LABEL   LABEL   TO
+         (a)         edge                              node   {F}    (b)
+         (b)         edge                              node   {F}    (c)
+         (c)         edge                              node   {F}    (d)
+         (b)         edge                              node   {K}    (e)
+        %  (c)         edge[bend left = 45]              node   {b}    (c)
+         %     edge[bend right=80] node[swap,very near start]{b} (y)
+                 
+         % (y)   edge[bend left=10]  node                      {d} (z)
+         %       edge[loop left]     node                      {e} (x)
+         % (z) edge[bend left=70]  node[swap,very near start]  {h} (y)
+                 
+         ;
+      \end{tikzpicture}& \texttt{Three Hops And Branch} & $ \drop{m,n}{\rename{f_{id}}{n}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{F}} \NJoin \rename{f_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K}} $ &  &  \\ \cline{1-3}
+       
+      \begin{tikzpicture}%
+        [>=stealth,
+         shorten >=1pt,
+         node distance=1.75cm,
+         on grid,
+         auto,
+         every state/.style={draw=black!60, fill=black!5, very thick}
+        ]
+      \node[state, fill=red!40] (a)              {a};
+      \node[state, fill=green!40] (b) [right=of a] {m};
+      \node[state, fill=blue!40] (c) [right=of b] {n};
+      \node[state, fill=yellow!40] (d) [right=of c] {d};
+      \node[state, fill= red!60] (e) [below=of b] {e};
+      
+      
+      \path[->]
+      %   FROM       BEND/LOOP           POSITION OF LABEL   LABEL   TO
+         (a)         edge                              node   {F}    (b)
+         (b)         edge                              node   {F}    (c)
+         (c)         edge                              node   {F}    (d)
+         (b)         edge                              node   {K}    (e)
+        %  (c)         edge[bend left = 45]              node   {b}    (c)
+         %     edge[bend right=80] node[swap,very near start]{b} (y)
+                 
+         % (y)   edge[bend left=10]  node                      {d} (z)
+         %       edge[loop left]     node                      {e} (x)
+         % (z) edge[bend left=70]  node[swap,very near start]  {h} (y)
+                 
+         ;
+      \end{tikzpicture}& \texttt{Three Hops And Branch} & $ \drop{m,n}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}, f_{id}}{m,n}{F}   \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K}} $ &  &  \\ \cline{1-3}
+       
+      \begin{tikzpicture}%
+        [>=stealth,
+         shorten >=1pt,
+         node distance=1.75cm,
+         on grid,
+         auto,
+         every state/.style={draw=black!60, fill=black!5, very thick}
+        ]
+      \node[state, fill=red!40] (a)              {a};
+      \node[state, fill=green!5] (b) [right=of a] {m};
+      \node[state, fill=yellow!40] (c) [right=of b] {n};
+      \node[state, fill=blue!40] (d) [right=of c] {d};
+      \node[state, fill=red!60] (e) [below=of b] {e};
+      \node[state, fill=green!100] (f) [below=of c] {f};
+      
+      
+      \path[->]
+      %   FROM       BEND/LOOP           POSITION OF LABEL   LABEL   TO
+         (a)         edge                              node   {F}    (b)
+         (b)         edge                              node   {F}    (c)
+         (c)         edge                              node   {F}    (d)
+         (b)         edge                              node   {K}    (e)
+         (c)         edge                              node   {K}    (f)
+        %  (c)         edge[bend left = 45]              node   {b}    (c)
+         %     edge[bend right=80] node[swap,very near start]{b} (y)
+                 
+         % (y)   edge[bend left=10]  node                      {d} (z)
+         %       edge[loop left]     node                      {e} (x)
+         % (z) edge[bend left=70]  node[swap,very near start]  {h} (y)
+                 
+         ;
+      \end{tikzpicture}& \texttt{Three Hops And Two Branches} & $ \drop{m,n}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{\rename{f_{id}}{n}{F}} \NJoin \rename{p_{id}}{m}{\rename{k_{id}}{k}{K}} \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{n}{K}} $ && \\ \cline{1-3}
        
        %  \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \drop{a}{A}   \rename{f_{id}}{m}{F} \NJoin \rename{p_{id}, f_{id}}{m,n}{F}   \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K} $ &  &  \\ \cline{1-3}
       \end{tabular}%
@@ -203,6 +385,95 @@
     % } (\trans\varphi)
   % \end{align*}
 \end{frame}
+
+
+
+\begin{frame}
+  % \begin{align*}
+
+    \begin{table}[h]
+      \resizebox{1.1\textwidth}{!}
+      {%
+      \begin{tabular}{cllll}
+      \cline{1-3}
+       \textbf{\texttt{Graph Pattern}} & \textbf{\texttt{Hop Type}}  & \textbf{\texttt{Expressions in $\mu-RA$}} &  &  \\ \cline{1-3}
+        
+       \begin{tikzpicture}%
+        [>=stealth,
+         shorten >=1pt,
+         node distance=1.75cm,
+         on grid,
+         auto,
+         every state/.style={draw=black!60, fill=black!5, very thick}
+        ]
+      \node[state,fill=red!40] (a)              {a};
+      \node[state, fill=green!40] (b) [right=of a] {m};
+      \node[state, fill=yellow!40] (c) [right=of b] {c};
+      \node[state, fill=blue!40] (d) [below=of b] {k};
+      \node[state, fill=red!20] (e) [above=of b] {e};
+      
+      
+      \path[->]
+      %   FROM       BEND/LOOP           POSITION OF LABEL   LABEL   TO
+         (a)         edge                              node   {F}    (b)
+         (b)         edge                              node   {F}    (c)
+         (b)         edge                              node   {K}    (d)
+         (b)         edge                              node   {K}    (e)
+        %  (c)         edge[bend left = 45]              node   {b}    (c)
+         %     edge[bend right=80] node[swap,very near start]{b} (y)
+                 
+         % (y)   edge[bend left=10]  node                      {d} (z)
+         %       edge[loop left]     node                      {e} (x)
+         % (z) edge[bend left=70]  node[swap,very near start]  {h} (y)
+                 
+         ;
+      \end{tikzpicture} & \texttt{Star (Isomorphism based semantics)} & $ \drop{m}{\filt[k <> k_{id}]{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K} \NJoin \rename{p_{id}}{m}{\rename{k_{id}}{k}{K}}}} $ && \\ \cline{1-3}
+       
+      \begin{tikzpicture}%
+        [>=stealth,
+         shorten >=1pt,
+         node distance=1.75cm,
+         on grid,
+         auto,
+         every state/.style={draw=black!60, fill=black!5, very thick}
+        ]
+        \node[state,fill=red!40] (a)              {a};
+        \node[state, fill=green!40] (b) [right=of a] {m};
+        \node[state, fill=yellow!40] (c) [right=of b] {c};
+        \node[state, fill=blue!40] (d) [below=of b] {k};
+        \node[state, fill=red!20] (e) [above=of b] {e};
+      
+      
+      \path[->]
+      %   FROM       BEND/LOOP           POSITION OF LABEL   LABEL   TO
+         (a)         edge                              node   {F}    (b)
+         (b)         edge                              node   {F}    (c)
+         (b)         edge                              node   {K}    (d)
+         (b)         edge                              node   {K}    (e)
+        %  (c)         edge[bend left = 45]              node   {b}    (c)
+         %     edge[bend right=80] node[swap,very near start]{b} (y)
+                 
+         % (y)   edge[bend left=10]  node                      {d} (z)
+         %       edge[loop left]     node                      {e} (x)
+         % (z) edge[bend left=70]  node[swap,very near start]  {h} (y)
+                 
+         ;
+      \end{tikzpicture}  & \texttt{Star (Homorphism based semantics)} & $ \drop{m}{\rename{f_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{F} \NJoin \rename{p_{id}}{m}{K} \NJoin \rename{p_{id}}{m}{\rename{k_{id}}{k}{K}}} $ && \\ \cline{1-3}
+       
+       %  \texttt{(a)-[FriendOf]->(b)-[FriendOf]->(c),} \\ \texttt{(c)-[FriendOf]->(d),}  \texttt{(b)-[Knows]->(d)}& \texttt{Three Hops And Branch} & $ \drop{a}{A}   \rename{f_{id}}{m}{F} \NJoin \rename{p_{id}, f_{id}}{m,n}{F}   \NJoin \rename{p_{id}}{n}{F} \NJoin \rename{p_{id}}{m}{K} $ &  &  \\ \cline{1-3}
+      \end{tabular}%
+      }
+      \end{table}
+    
+  %  One Hop \hspace{1cm} | \hspace{1cm} \widetilde\pi_{m} \big( \rename {f_{id}} m F \NJoin \rename {p_{id}} m K \big) \\
+  %  Two Hops \hspace{1cm} | \hspace{1cm} \widetilde\pi_{m} \Big( \big( \rename {f_{id}} m F \NJoin \rename {p_{id}} m F \big) \NJoin \rename {p_{id}} m K \Big) \\
+  %  Three Hops 
+    % \trans{\rename a b \varphi} &= \text{\lstinline{SELECT a AS b,
+    % <other_cols> FROM}
+    % } (\trans\varphi)
+  % \end{align*}
+\end{frame}
+
 
 % \begin{frame}[fragile]
 %   \frametitle{So what exactly do we feed PostgreSQL?}
