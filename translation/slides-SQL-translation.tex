@@ -198,9 +198,9 @@
          auto,
          every state/.style={draw=black!60, fill=black!5, very thick}
         ]
-      \node[state,fill=green!40] (a)              {a};
+      \node[state,fill=green!40] (a)              {};
       \node[state, fill=blue!40] (b) [right=of a] {m};
-      \node[state, fill=red!40] (c) [right=of b] {c};
+      \node[state, fill=red!40] (c) [right=of b] {};
       
       
       \path[->]
@@ -225,10 +225,10 @@
          auto,
          every state/.style={draw=black!60, fill=black!5, very thick}
         ]
-      \node[state, fill=green!40] (a)              {a};
+      \node[state, fill=green!40] (a)              {};
       \node[state, fill= blue!40] (b) [right=of a] {m};
-      \node[state, fill=red!40] (c) [right=of b] {c};
-      \node[state, fill=yellow!40] (d) [below=of b] {d};
+      \node[state, fill=red!40] (c) [right=of b] {};
+      \node[state, fill=yellow!40] (d) [below=of b] {};
       
       
       \path[->]
@@ -254,11 +254,11 @@
          auto,
          every state/.style={draw=black!60, fill=black!5, very thick}
         ]
-      \node[state, fill=green!40] (a)              {a};
-      \node[state, fill=blue!40] (b) [right=of a] {b};
+      \node[state, fill=green!40] (a)              {};
+      \node[state, fill=blue!40] (b) [right=of a] {m'};
       \node[state, fill=red!40] (c) [right=of b] {m};
-      \node[state, fill=yellow!40] (d) [right=of c] {d};
-      \node[state, fill=red!60] (e) [below=of c] {e};
+      \node[state, fill=yellow!40] (d) [right=of c] {};
+      \node[state, fill=red!60] (e) [below=of c] {};
       
       
       \path[->]
@@ -285,11 +285,11 @@
          auto,
          every state/.style={draw=black!60, fill=black!5, very thick}
         ]
-      \node[state, fill=green!40] (a)              {a};
-      \node[state, fill=blue!40] (b) [right=of a] {m};
-      \node[state, fill=red!40] (c) [right=of b] {n};
-      \node[state, fill=yellow!40] (d) [right=of c] {d};
-      \node[state, fill=red!60] (e) [below=of b] {e};
+        \node[state, fill=red!40] (a)              {};
+        \node[state, fill=green!40] (b) [right=of a] {m};
+        \node[state, fill=blue!40] (c) [right=of b] {n};
+        \node[state, fill=yellow!40] (d) [right=of c] {};
+        \node[state, fill= red!60] (e) [below=of b] {};
       
       
       \path[->]
@@ -316,11 +316,11 @@
          auto,
          every state/.style={draw=black!60, fill=black!5, very thick}
         ]
-      \node[state, fill=red!40] (a)              {a};
+      \node[state, fill=red!40] (a)              {};
       \node[state, fill=green!40] (b) [right=of a] {m};
       \node[state, fill=blue!40] (c) [right=of b] {n};
-      \node[state, fill=yellow!40] (d) [right=of c] {d};
-      \node[state, fill= red!60] (e) [below=of b] {e};
+      \node[state, fill=yellow!40] (d) [right=of c] {};
+      \node[state, fill= red!60] (e) [below=of b] {};
       
       
       \path[->]
@@ -347,12 +347,12 @@
          auto,
          every state/.style={draw=black!60, fill=black!5, very thick}
         ]
-      \node[state, fill=red!40] (a)              {a};
+      \node[state, fill=red!40] (a)              {};
       \node[state, fill=green!5] (b) [right=of a] {m};
       \node[state, fill=yellow!40] (c) [right=of b] {n};
-      \node[state, fill=blue!40] (d) [right=of c] {d};
-      \node[state, fill=red!60] (e) [below=of b] {e};
-      \node[state, fill=green!100] (f) [below=of c] {f};
+      \node[state, fill=blue!40] (d) [right=of c] {};
+      \node[state, fill=red!60] (e) [below=of b] {k};
+      \node[state, fill=green!100] (f) [below=of c] {};
       
       
       \path[->]
@@ -406,11 +406,11 @@
          auto,
          every state/.style={draw=black!60, fill=black!5, very thick}
         ]
-      \node[state,fill=red!40] (a)              {a};
+      \node[state,fill=red!40] (a)              {};
       \node[state, fill=green!40] (b) [right=of a] {m};
-      \node[state, fill=yellow!40] (c) [right=of b] {c};
+      \node[state, fill=yellow!40] (c) [right=of b] {};
       \node[state, fill=blue!40] (d) [below=of b] {k};
-      \node[state, fill=red!20] (e) [above=of b] {e};
+      \node[state, fill=red!20] (e) [above=of b] {};
       
       
       \path[->]
@@ -437,11 +437,11 @@
          auto,
          every state/.style={draw=black!60, fill=black!5, very thick}
         ]
-        \node[state,fill=red!40] (a)              {a};
+        \node[state,fill=red!40] (a)              {};
         \node[state, fill=green!40] (b) [right=of a] {m};
-        \node[state, fill=yellow!40] (c) [right=of b] {c};
+        \node[state, fill=yellow!40] (c) [right=of b] {};
         \node[state, fill=blue!40] (d) [below=of b] {k};
-        \node[state, fill=red!20] (e) [above=of b] {e};
+        \node[state, fill=red!20] (e) [above=of b] {};
       
       
       \path[->]
