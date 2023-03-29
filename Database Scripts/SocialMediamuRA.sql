@@ -1232,3 +1232,37 @@ SELECT person_id, known_id , k, friend_id
 WHERE k <> known_id	  
 -- ORDER BY 1;
 		
+
+
+/*
+
+SEMI JOIN FIXED POINT
+
+*/		
+
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
+	SELECT p, k
+	  FROM (SELECT person_id AS p, known_id AS k 
+			  FROM knows
+		   ) AS const
+	UNION
+	
+	SELECT p, k
+	  FROM (SELECT p , k 
+			  FROM (SELECT * 
+			  		  FROM  (SELECT person_id AS p, known_id AS col1 
+					           FROM trv_knows
+				            ) AS t1 
+				   ) AS t
+			NATURAL
+			   JOIN (SELECT * 
+					   FROM (SELECT person_id AS col1, known_id AS k
+					           FROM knows
+					        ) AS t
+					) AS t2
+		   ) AS rec;
+		   		   
+
+SELECT * FROM trv_knows ORDER BY 1;
+
+DROP VIEW trv_knows;
