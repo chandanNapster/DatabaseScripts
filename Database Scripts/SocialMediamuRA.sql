@@ -1240,29 +1240,128 @@ SEMI JOIN FIXED POINT
 
 */		
 
-CREATE OR REPLACE TEMPORARY RECURSIVE VIEW trv_knows (person_id, known_id) AS
-	SELECT p, k
-	  FROM (SELECT person_id AS p, known_id AS k 
-			  FROM knows
-		   ) AS const
-	UNION
+CREATE TEMPORARY TABLE TMP AS 
+(SELECT * FROM knows);
+
+DO $BODY$
+	BEGIN
+		CREATE TEMPORARY TABLE sj_trv_knows AS
+			(SELECT * FROM TMP);
+		WHILE EXISTS (SELECT 1 FROM sj_trv_knows) LOOP
+			CREATE TEMPORARY TABLE NEW_LINES AS 
+				SELECT *
+				  FROM (SELECT person_id AS p, known_id AS k FROM TMP) AS t
+				  WHERE EXISTS (SELECT 1 FROM knows WHERE k = person_id)
+				 ;
+			INSERT INTO TMP (SELECT * FROM NEW_LINES);
+			DROP TABLE sj_trv_knows;
+			ALTER TABLE NEW_LINES RENAME TO sj_trv_knows;
+			
+			
+			
+		END LOOP;	
+	END;
+	$BODY$;
 	
-	SELECT p, k
-	  FROM (SELECT p , k 
-			  FROM (SELECT * 
-			  		  FROM  (SELECT person_id AS p, known_id AS col1 
-					           FROM trv_knows
-				            ) AS t1 
-				   ) AS t
-			NATURAL
-			   JOIN (SELECT * 
-					   FROM (SELECT person_id AS col1, known_id AS k
-					           FROM knows
-					        ) AS t
-					) AS t2
-		   ) AS rec;
-		   		   
+DROP TABLE sj_trv_knows;
+ALTER TABLE TMP RENAME TO sj_trv_knows;
 
-SELECT * FROM trv_knows ORDER BY 1;
+DROP TABLE TMP;
+DROP TABLE sj_trv_knows;
 
-DROP VIEW trv_knows;
+SELECT * FROM TMP;
+SELECT * FROM sj_trv_knows;
+
+/*
+WORKING TOWARDS IT
+*/
+
+CREATE TEMPORARY TABLE TWO_HOP AS
+(SELECT *
+  FROM (SELECT person_id AS p, known_id AS k FROM knows) AS t
+ WHERE EXISTS (SELECT 1 FROM knows WHERE k = person_id));
+ 
+ 
+
+SELECT * 
+  FROM (SELECT person_id, known_id FROM knows) AS t
+WHERE EXISTS (SELECT 1 FROM TWO_HOP WHERE known_id = p)  
+
+
+/*
+
+APPRAOCH BASED ON SEMI-JOIN
+*/
+
+CREATE TEMPORARY TABLE TMP AS
+(SELECT * FROM knows);
+
+DO $$
+		BEGIN
+		CREATE TEMPORARY TABLE X AS 
+			(SELECT * FROM TMP);
+		WHILE EXISTS (SELECT 1 FROM X)  LOOP
+			CREATE TEMPORARY TABLE NEW_LINES AS 
+			(
+				SELECT *
+				  FROM (SELECT person_id, known_id AS k FROM knows) AS t
+				 WHERE EXISTS (SELECT 1 FROM X WHERE k = person_id)
+			);
+			
+			INSERT INTO TMP (SELECT * FROM NEW_LINES);
+			DROP TABLE X;
+			ALTER TABLE NEW_LINES RENAME TO X;
+			END LOOP;
+		END;	
+	$$		
+
+
+SELECT * FROM X;
+DROP TABLE X;
+DROP TABLE TMP;
+
+
+SELECT * FROM TMP;
+
+/*
+THIS IS AN APPRAOCH THAT I WANT TO WORK
+*/
+DROP TABLE knows;
+
+
+CREATE TABLE knows(
+    person_id INT NOT NULL,
+    known_id INT NOT NULL
+);
+
+INSERT INTO knows(
+    person_id,
+    known_id
+)
+VALUES
+    (1,2),
+    (2,3),
+    (3,4);
+
+DROP TABLE TWO_HOP; 
+DROP TABLE THREE_HOP;
+DROP TABLE TMP;
+
+CREATE TEMPORARY TABLE TMP AS (SELECT * FROM knows);
+
+CREATE TEMPORARY TABLE TWO_HOP AS
+(SELECT *
+  FROM (SELECT person_id AS p, known_id AS k FROM knows) AS t
+ WHERE EXISTS (SELECT 1 FROM knows WHERE k = person_id));
+
+INSERT INTO TMP (SELECT * FROM TWO_HOP);
+
+
+CREATE TEMPORARY TABLE THREE_HOP AS
+(SELECT * 
+  FROM (SELECT person_id, known_id FROM knows) AS t
+WHERE EXISTS (SELECT 1 FROM TWO_HOP WHERE known_id = p));  
+
+INSERT INTO TMP (SELECT * FROM THREE_HOP);
+
+SELECT * FROM TMP;
