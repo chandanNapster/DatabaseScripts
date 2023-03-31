@@ -1,7 +1,7 @@
-DROP view pg_temp_8.fixpoint_trv_friend_of;
-DROP view pg_temp_8.trv_knows;
-DROP view fixpoint_trv_friend_of;
-DROP view trv_knows;
+DROP view IF EXISTS fixpoint_trv_friend_of;
+DROP view IF EXISTS trv_knows;
+DROP view IF EXISTS fixpoint_trv_friend_of;
+DROP view IF EXISTS trv_knows;
 DROP TABLE IF EXISTS person;
 DROP TABLE IF EXISTS friendOf;
 DROP TABLE IF EXISTS knows;
@@ -43,7 +43,7 @@ INSERT INTO friendOf(
 )
 SELECT person_id, person_id + 1 AS friend_id
 FROM person
-WHERE person_id % 100 != 0;
+WHERE person_id % 50 != 0;
 -- WHERE CASE 
 -- 		WHEN (SELECT random() FROM generate_series(1,20) LIMIT 1) < 0.1 THEN person_id % 2 != 0 
 -- 		WHEN (SELECT random() FROM generate_series(1,20) LIMIT 1) > 0.1 AND (SELECT random() FROM generate_series(1,20) LIMIT 1) < 0.3 THEN person_id % 3 != 0 

@@ -1303,9 +1303,12 @@ DO $$
 		WHILE EXISTS (SELECT 1 FROM X)  LOOP
 			CREATE TEMPORARY TABLE NEW_LINES AS 
 			(
-				SELECT *
-				  FROM (SELECT person_id, known_id AS k FROM knows) AS t
-				 WHERE EXISTS (SELECT 1 FROM X WHERE k = person_id)
+				SELECT person_id,known_id 
+				  FROM (SELECT p AS person_id, k AS known_id
+				  		  FROM (SELECT person_id AS p, known_id AS k FROM knows) AS t
+				         WHERE 
+						EXISTS (SELECT 1 FROM X WHERE k = person_id)) AS t1
+				
 			);
 			
 			INSERT INTO TMP (SELECT * FROM NEW_LINES);
@@ -1341,27 +1344,192 @@ INSERT INTO knows(
 VALUES
     (1,2),
     (2,3),
-    (3,4);
+    (3,4),
+	(4,5);
 
 DROP TABLE TWO_HOP; 
 DROP TABLE THREE_HOP;
 DROP TABLE TMP;
+DROP TABLE FOUR_HOP;
 
 CREATE TEMPORARY TABLE TMP AS (SELECT * FROM knows);
 
 CREATE TEMPORARY TABLE TWO_HOP AS
-(SELECT *
-  FROM (SELECT person_id AS p, known_id AS k FROM knows) AS t
- WHERE EXISTS (SELECT 1 FROM knows WHERE k = person_id));
+(SELECT person_id, known_id 
+   FROM  (SELECT p AS person_id, k AS known_id
+  			FROM (SELECT person_id AS p, known_id AS k FROM knows) AS t
+  		   WHERE 
+          EXISTS (SELECT 1 FROM knows WHERE k = person_id)) AS t2
+);
 
 INSERT INTO TMP (SELECT * FROM TWO_HOP);
 
 
 CREATE TEMPORARY TABLE THREE_HOP AS
-(SELECT * 
-  FROM (SELECT person_id, known_id FROM knows) AS t
-WHERE EXISTS (SELECT 1 FROM TWO_HOP WHERE known_id = p));  
+(SELECT p AS person_id, k AS known_id
+  FROM (SELECT person_id AS p, known_id AS k FROM knows) AS t
+WHERE EXISTS (SELECT 1 FROM TWO_HOP WHERE k = person_id));  
 
 INSERT INTO TMP (SELECT * FROM THREE_HOP);
 
+CREATE TEMPORARY TABLE FOUR_HOP AS
+(SELECT p AS person_id, k AS known_id
+  FROM (SELECT person_id AS p, known_id AS k FROM knows) AS t
+WHERE EXISTS (SELECT 1 FROM THREE_HOP WHERE k = person_id )
+);
+
+INSERT INTO TMP (SELECT * FROM FOUR_HOP);
+
 SELECT * FROM TMP;
+
+/*
+THE SEMI JOIN VERSION OF BRANCHING AND IT WORKS 
+*/
+DROP TABLE X;
+DROP TABLE TMP;
+
+CREATE TEMPORARY TABLE TMP AS
+(SELECT * FROM knows);
+
+DO $$
+		BEGIN
+		CREATE TEMPORARY TABLE X AS 
+			(SELECT * FROM TMP);
+		WHILE EXISTS (SELECT 1 FROM X)  LOOP
+			CREATE TEMPORARY TABLE NEW_LINES AS 
+			(
+				SELECT person_id,known_id 
+				  FROM (SELECT p AS person_id, k AS known_id
+				  		  FROM (SELECT person_id AS p, known_id AS k FROM knows) AS t
+				         WHERE 
+						EXISTS (SELECT 1 FROM X WHERE k = person_id)) AS t1
+				
+			);
+			
+			INSERT INTO TMP (SELECT * FROM NEW_LINES);
+			DROP TABLE X;
+			ALTER TABLE NEW_LINES RENAME TO X;
+			END LOOP;
+		END;	
+	$$		
+
+
+SELECT * FROM X;
+
+
+SELECT * FROM TMP;
+
+/*
+I WANT TO TEST THE HYPOTHESIS THAT SEMI JOIN IS FASTER APPROACH THAN COMPOSITION
+
+*/
+
+/*
+ TEST DATA SET
+*/
+
+
+DROP TABLE IF EXISTS friendOf;
+
+
+
+CREATE TABLE friendOf(
+    person_id INT NOT NULL,
+    friend_id INT
+);
+
+
+
+INSERT INTO friendOf(
+    person_id,
+    friend_id
+)   
+VALUES
+    (1,2),
+    (2,3),
+    (3,5),
+    (5,7),
+    (7,8),
+    (8,10),
+    (10,12),
+    (12,13),
+    (13,14),
+    (14,15);
+
+
+/*
+THIS IS THE SEMI JOIN QUERY
+*/
+
+
+DROP TABLE IF EXISTS X;
+DROP TABLE IF EXISTS TMP;
+
+CREATE TEMPORARY TABLE TMP AS
+(SELECT * FROM friendOf);
+
+DO $$
+		BEGIN
+		CREATE TEMPORARY TABLE X AS 
+			(SELECT * FROM TMP);
+		WHILE EXISTS (SELECT 1 FROM X)  LOOP
+			CREATE TEMPORARY TABLE NEW_LINES AS 
+			(
+				SELECT person_id,friend_id 
+				  FROM (SELECT p AS person_id, k AS friend_id
+				  		  FROM (SELECT person_id AS p, friend_id AS k FROM friendOf) AS t
+				         WHERE 
+						EXISTS (SELECT 1 FROM X WHERE k = person_id)) AS t1
+				
+			);
+			
+			INSERT INTO TMP (SELECT * FROM NEW_LINES);
+			DROP TABLE X;
+			ALTER TABLE NEW_LINES RENAME TO X;
+			END LOOP;
+		END;	
+	$$		
+
+SELECT * FROM TMP;
+
+SELECT * FROM X;
+
+/*
+	THE SECOND VERSION IS THAT OF THE FIXED POINT
+*/
+DROP VIEW IF EXISTS fixpoint_trv_friend_of;
+
+
+CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a) AS
+    SELECT src, a 
+	  FROM (SELECT src, a 
+			  FROM (SELECT * 
+					  FROM (SELECT person_id AS src, friend_id AS a 
+							  FROM friendOf
+						   ) AS t 
+					--  WHERE src = 1
+				   ) AS t
+		   ) AS const
+  UNION 
+    SELECT src, a 
+	  FROM (SELECT src, a 
+			  FROM (SELECT * 
+					  FROM (SELECT src, a AS col1 
+							  FROM fixpoint_trv_friend_of
+						   ) AS t 
+				   NATURAL 
+					  JOIN (SELECT col1, a 
+  							  FROM (SELECT * 
+		  							  FROM (SELECT person_id AS col1, friend_id AS a 
+				  							  FROM friendOf
+			   							   ) AS t 
+	   							   ) AS t 
+						   ) AS cb
+				   ) AS t	
+		   ) AS rec; 
+	
+/*
+	RUN THE QUERY
+*/	
+SELECT * 
+  FROM fixpoint_trv_friend_of 
