@@ -1533,3 +1533,47 @@ CREATE OR REPLACE TEMPORARY RECURSIVE VIEW fixpoint_trv_friend_of (src, a) AS
 */	
 SELECT * 
   FROM fixpoint_trv_friend_of 
+
+/*
+	OPTIMIZED VERSION OF SEMI JOIN 
+*/  
+DROP TABLE IF EXISTS X;
+DROP TABLE IF EXISTS TMP;
+
+CREATE TEMPORARY TABLE TMP AS
+(SELECT * FROM friendOf);
+
+DO $$
+		BEGIN
+		CREATE TEMPORARY TABLE X AS 
+			(SELECT * FROM TMP);
+		WHILE EXISTS (SELECT 1 FROM X)  LOOP
+			CREATE TEMPORARY TABLE NEW_LINES AS 
+			(
+				SELECT person_id,friend_id 
+				  FROM (SELECT p AS person_id, k AS friend_id
+				  		  FROM (SELECT person_id AS p, friend_id AS k FROM friendOf) AS t
+				         WHERE 
+						EXISTS (SELECT 1 FROM X WHERE k = person_id)) AS t1
+				
+			);
+			
+			INSERT INTO TMP (SELECT * 
+							   FROM NEW_LINES
+							 EXCEPT
+							 SELECT *
+							   FROM TMP
+							);
+							
+-- 			INSERT INTO TMP (SELECT * 
+-- 							   FROM NEW_LINES
+-- 							);				
+			DROP TABLE X;
+			ALTER TABLE NEW_LINES RENAME TO X;
+			END LOOP;
+		END;	
+	$$		
+
+SELECT * FROM TMP;
+
+SELECT * FROM X;
